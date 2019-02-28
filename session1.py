@@ -3,7 +3,7 @@ from tensorflow.keras import backend as K
 
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-"""
+
 # Exercise 1
 a = K.placeholder(shape=(5,))
 b = K.placeholder(shape=(5,))
@@ -11,6 +11,13 @@ c = K.placeholder(shape=(5,))
 
 e = a**2 + b**2 + c**2 + 2 * b * c
 fun = K.function(inputs=[a, b, c], outputs=(e,))
+
+v_a = 1
+v_b = 2
+v_c = 3
+print("Exercise 1:")
+print("{a}^2 + {b}^2 + {c}^2 + 2 * {a} * {b} = {f}".format(a=v_a, b=v_b, c=v_c, f=fun([v_a, v_b, v_c])[0]))
+print()
 
 # Exercise 2
 x = K.placeholder(shape=())
@@ -46,7 +53,7 @@ v_x = np.ones(shape=(2,))
 print("Exercise 3:")
 for mul in range(10):
     print("mul = {} : {}".format(mul, f([mul * v_w, mul * v_b, mul * v_x])))
-"""
+print()
 
 # Exercise 4
 
