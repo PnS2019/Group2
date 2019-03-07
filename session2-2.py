@@ -134,8 +134,20 @@ for epoch in range(num_epochs):
   train_X = train_X[permutation]
   train_y = train_y[permutation]
   losses = np.array([])
-  print("Epoch {} ".format(epoch), end="", flush=True)
+
+  # Progress bar
+  disp = "\rEpoch {epoch}: [{bar_1}>{bar_2}] "
+  progess_len = 20
+  print("Epoch {:<3} ".format(epoch), end="", flush=True)
+
   for batch in range(0, num_train_samples, batch_size):
+
+    # Progress bar
+    progress = progess_len * batch / num_train_samples
+    bar_1 = "=" * int(progress)
+    bar_2 = "." * (progess_len - len(bar_1) - 1)
+    print(disp.format(epoch=epoch, bar_1=bar_1, bar_2=bar_2), end="", flush=True)
+
     start = batch
     end = min(batch + batch_size, len(train_X))
 
@@ -147,9 +159,11 @@ for epoch in range(num_epochs):
 
   acc, pred = test_function((test_X, np.expand_dims(test_y, axis=-1)))
 
+  accuracy = np.count_nonzero(acc) / len(acc)
+
   #print(acc, pred)
 
-  print("Loss - {:0.4}".format(losses.mean()))
+  print("Loss - {:0.4}  Accuracy - {:0.4}".format(losses.mean(), accuracy))
 
 
 ############ YOUR CODE ABOVE THIS #################
