@@ -1,6 +1,6 @@
 """Convolutional Neural Network for Fashion MNIST Classification.
 
-Team #name
+Team 2
 """
 from __future__ import print_function, absolute_import
 
