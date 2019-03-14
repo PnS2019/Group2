@@ -13,6 +13,11 @@ from tensorflow.keras.utils import to_categorical
 from pnslib import utils
 from pnslib import ml
 
+import os
+from tensorflow import logging
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+logging.set_verbosity(logging.ERROR)
+
 # Load all the ten classes from Fashion MNIST
 # complete label description is at
 # https://github.com/zalandoresearch/fashion-mnist#labels
@@ -55,10 +60,10 @@ input_dim = train_X.shape[1]
 
 # defining the batch size and epochs
 batch_size = 64
-num_epochs = 20
+num_epochs = 30
 
 # defining the learning rate
-lr = 0.1
+lr = 0.01
 
 # defining the number of layers and number of hidden units in each layer
 num_layers = 2
@@ -69,6 +74,75 @@ num_units = [100, 100]
 # the loss, while updating the necessary variables underneath
 # please provide the test_function which takes in the input and target , and
 # outputs a tuple of (accuracy, prediction)
+
+# building the model
+
+# defining the placeholders to feed the input and target data
+input_tensor = K.placeholder(shape=(None, input_dim), dtype='float32')
+
+target_tensor = K.placeholder(shape=(None, num_classes), dtype='float32')
+
+
+weight_variables = []
+bias_variables = []
+
+weight_variables.append(K.random_uniform_variable(shape=(input_dim, num_units[0]),
+                                                  low=-1., high=1.,
+                                                  dtype='float32'))
+
+bias_variables.append(K.zeros(shape=(num_units[0], ), dtype='float32'))
+
+for i in range(1, num_layers):
+    weight_variables.append(K.random_uniform_variable(shape=(num_units[i - 1], num_units[i]),
+                                                      low=-1., high=1.,
+                                                      dtype='float32'))
+    bias_variables.append(K.zeros(shape=(num_units[i], ), dtype='float32'))
+
+weight_variables.append(K.random_uniform_variable(shape=(num_units[-1], num_classes),
+                                                  low=-1., high=1.,
+                                                  dtype='float32'))
+bias_variables.append(K.zeros(shape=(num_classes, ), dtype='float32'))
+
+
+output_tensor = K.dot(input_tensor, weight_variables[0]) + bias_variables[0]
+output_tensor = K.relu(output_tensor)
+
+for i in range(1, num_layers):
+    output_tensor = K.dot(output_tensor, weight_variables[i]) + bias_variables[i]
+    output_tensor = K.relu(output_tensor)
+
+output_tensor = K.dot(output_tensor, weight_variables[-1]) + bias_variables[-1]
+output_tensor = K.softmax(output_tensor)
+
+# defining the mean loss tensor
+loss_tensor = K.mean(K.categorical_crossentropy(target_tensor,
+                                                output_tensor))
+
+params = weight_variables + bias_variables
+# getting the gradients of the mean loss with respect to the weight and bias
+gradient_tensors = K.gradients(loss=loss_tensor, variables=params)
+updates = []
+for param, tensor in zip(params, gradient_tensors):
+    updates.append((param, param - lr * tensor))
+
+# creating a training function which also updates the variables when the
+# function is called based on the lists of updates provided
+train_function = K.function(inputs=(input_tensor, target_tensor),
+                            outputs=(loss_tensor,),
+                            updates=updates)
+
+# for logistic regression, the prediction is 1 if greater than 0.5 and 0
+# if less
+prediction_tensor = K.cast(K.argmax(output_tensor, axis=1), dtype='float32')
+
+target_argmax_tensor = K.cast(K.argmax(target_tensor, axis=1), dtype='float32')
+# computing the accuracy based on how many prediction tensors equal the target
+# tensors
+accuracy_tensor = K.equal(prediction_tensor, target_argmax_tensor)
+
+# a test function to evaluate the performance of the model
+test_function = K.function(inputs=(input_tensor, target_tensor),
+                           outputs=(accuracy_tensor, prediction_tensor))
 
 
 # training loop here
@@ -123,7 +197,9 @@ plt.figure()
 for i in range(2):
     for j in range(5):
         plt.subplot(2, 5, i * 5 + j + 1)
-        plt.imshow(test_x[i * 5 + j].reshape(28, 28), cmap="gray")
+
+        image = test_x[i * 5 + j].reshape(28, 28)
+        plt.imshow(image, cmap="gray")
         plt.title("Ground Truth: %s, \n Prediction %s" %
                   (labels[ground_truths[i * 5 + j]],
                    labels[preds[i * 5 + j]]))

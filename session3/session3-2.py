@@ -89,7 +89,7 @@ print("[MESSAGE] Model is compiled.")
 # train the model with fit function
 # See https://keras.io/models/model/ for usage
 model.fit(x=train_x, y=train_Y,
-          batch_size=64, epochs=10,
+          batch_size=64, epochs=100,
           validation_data=(test_x, test_Y))
 
 print("[MESSAGE] Model is trained.")
