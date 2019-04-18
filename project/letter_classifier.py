@@ -148,7 +148,8 @@ for i in range(2):
   for j in range(5):
     plt.subplot(2, 5, i * 5 + j + 1)
     plt.imshow(np.squeeze(test_x[i * 5 + j]), cmap="gray")
-    plt.title("T: %s, \n P %s" %
-              (string.ascii_uppercase[ground_truths[i * 5 + j]],
-               string.ascii_uppercase[preds[i * 5 + j]]))
+    plt.title(string.ascii_uppercase[preds[i * 5 + j]])
 plt.show()
+
+
+[[a, b], [a, b]]
