@@ -137,8 +137,8 @@ print("[MESSAGE] Model is saved.")
 
 # visualize the ground truth and prediction
 # take first 10 examples in the testing dataset
-test_x_vis = train_x[:10]  # fetch first 10 samples
-ground_truths = train_y[:10]  # fetch first 10 ground truth prediction
+test_x_vis = test_x[:10]  # fetch first 10 samples
+ground_truths = test_y[:10]  # fetch first 10 ground truth prediction
 # predict with the model
 preds = np.argmax(model.predict(test_x_vis), axis=1).astype(np.int)
 
@@ -147,6 +147,6 @@ plt.figure()
 for i in range(2):
   for j in range(5):
     plt.subplot(2, 5, i * 5 + j + 1)
-    plt.imshow(np.squeeze(train_x[i * 5 + j]), cmap="gray")
+    plt.imshow(np.squeeze(test_x[i * 5 + j]), cmap="gray")
     plt.title(string.ascii_uppercase[preds[i * 5 + j]])
 plt.show()
