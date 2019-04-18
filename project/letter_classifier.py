@@ -5,7 +5,7 @@ from __future__ import print_function, absolute_import
 import numpy as np
 import matplotlib.pyplot as plt
 
-from tensorflow.keras.layers import Input, Dense, Conv2D, MaxPooling2D, Flatten
+from tensorflow.keras.layers import Input, Dense, Conv2D, MaxPooling2D, Flatten, Dropout
 from tensorflow.keras.models import Model
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
@@ -89,7 +89,9 @@ y = MaxPooling2D(pool_sizes[0], pool_strides[0])(y)
 y = Conv2D(num_kernels[1], kernel_sizes[1], activation='relu')(y)
 y = MaxPooling2D(pool_sizes[1], pool_strides[1])(y)
 y = Flatten()(y)
+y = Dropout(.5)(y)
 y = Dense(num_hidden_units, activation='relu')(y)
+y = Dropout(.1)(y)
 y = Dense(num_classes, activation='softmax')(y)
 model = Model(x, y)
 
@@ -123,7 +125,7 @@ print("[MESSAGE] Data Generator is created.")
 # train the model
 history = model.fit_generator(datagen.flow(train_x, train_Y, batch_size=64),
                               steps_per_epoch=len(train_x) / 64,
-                              epochs=300,
+                              epochs=100,
                               validation_data=(test_x, test_Y))
 
 print("[MESSAGE] Model is trained.")
