@@ -81,7 +81,7 @@ num_kernels = [20, 25]
 pool_sizes = [(2, 2), (2, 2)]
 pool_strides = [(2, 2), (2, 2)]
 
-num_hidden_units = 200
+num_hidden_units = 100
 
 x = Input(shape=input_shape)
 y = Conv2D(num_kernels[0], kernel_sizes[0], activation='relu')(x)
@@ -89,7 +89,7 @@ y = MaxPooling2D(pool_sizes[0], pool_strides[0])(y)
 y = Conv2D(num_kernels[1], kernel_sizes[1], activation='relu')(y)
 y = MaxPooling2D(pool_sizes[1], pool_strides[1])(y)
 y = Flatten()(y)
-y = Dropout(.5)(y)
+y = Dropout(.1)(y)
 y = Dense(num_hidden_units, activation='relu')(y)
 y = Dropout(.1)(y)
 y = Dense(num_classes, activation='softmax')(y)
