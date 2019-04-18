@@ -33,7 +33,6 @@ for image in os.listdir("data/letters/"):
 
   index = letters.index(letter)
 
-  print(letter, index)
   X.append(im)
   y.append(index)
 
@@ -47,8 +46,6 @@ test_y = np.array(y)
 (train_x, train_y, test_x, test_y) = utils.fashion_mnist_load(
     data_type="full", flatten=False)
 """
-
-print(train_y)
 
 num_classes = len(string.ascii_uppercase)
 
@@ -126,7 +123,7 @@ print("[MESSAGE] Data Generator is created.")
 # train the model
 history = model.fit_generator(datagen.flow(train_x, train_Y, batch_size=64),
                               steps_per_epoch=len(train_x) / 64,
-                              epochs=10,
+                              epochs=100,
                               validation_data=(test_x, test_Y))
 
 print("[MESSAGE] Model is trained.")
