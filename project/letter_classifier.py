@@ -75,13 +75,13 @@ num_train_samples = train_x.shape[0]
 num_test_samples = test_x.shape[0]
 input_shape = train_x.shape[1:]
 
-kernel_sizes = [(7, 7), (5, 5)]
+kernel_sizes = [(21, 21), (5, 5)]
 num_kernels = [20, 25]
 
 pool_sizes = [(2, 2), (2, 2)]
 pool_strides = [(2, 2), (2, 2)]
 
-num_hidden_units = 200
+num_hidden_units = 500
 
 x = Input(shape=input_shape)
 y = Conv2D(num_kernels[0], kernel_sizes[0], activation='relu')(x)
@@ -123,7 +123,7 @@ print("[MESSAGE] Data Generator is created.")
 # train the model
 history = model.fit_generator(datagen.flow(train_x, train_Y, batch_size=64),
                               steps_per_epoch=len(train_x) / 64,
-                              epochs=100,
+                              epochs=300,
                               validation_data=(test_x, test_Y))
 
 print("[MESSAGE] Model is trained.")
@@ -146,7 +146,7 @@ for i in range(2):
   for j in range(5):
     plt.subplot(2, 5, i * 5 + j + 1)
     plt.imshow(np.squeeze(test_x[i * 5 + j]), cmap="gray")
-    plt.title("Ground Truth: %s, \n Prediction %s" %
+    plt.title("T: %s, \n P %s" %
               (string.ascii_uppercase[ground_truths[i * 5 + j]],
                string.ascii_uppercase[preds[i * 5 + j]]))
 plt.show()
