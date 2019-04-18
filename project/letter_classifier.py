@@ -75,13 +75,13 @@ num_train_samples = train_x.shape[0]
 num_test_samples = test_x.shape[0]
 input_shape = train_x.shape[1:]
 
-kernel_sizes = [(21, 21), (5, 5)]
+kernel_sizes = [(7, 7), (5, 5)]
 num_kernels = [20, 25]
 
 pool_sizes = [(2, 2), (2, 2)]
 pool_strides = [(2, 2), (2, 2)]
 
-num_hidden_units = 500
+num_hidden_units = 200
 
 x = Input(shape=input_shape)
 y = Conv2D(num_kernels[0], kernel_sizes[0], activation='relu')(x)
