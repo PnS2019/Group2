@@ -2,11 +2,14 @@
 
 from PIL import Image, ImageFont, ImageDraw
 import string
+import os
+from skimage.util import random_noise
+import numpy as np
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 
-def draw(text, size, color, background_color=(0, 0, 0)):
-    fontPath = '/home/FreeSansBold.ttf'
-    font = ImageFont.truetype(fontPath, size[0])
+def draw(text, size, color, font, background_color=(0, 0, 0)):
+    font = ImageFont.truetype(font, size[0])
     size2 = font.getsize(text)
     im = Image.new('RGB', size2, background_color)
     draw = ImageDraw.Draw(im)
@@ -32,14 +35,25 @@ def draw(text, size, color, background_color=(0, 0, 0)):
     return cropped.resize(size)
 
 
-size = (200, 200)
+datagen = ImageDataGenerator(width_shift_range=0.1,
+                             height_shift_range=0.1,
+                             rotation_range=10,
+                             shear_range=0.1,
+                             validation_split=0.2)
+
+size = (32, 32)
 background_color = (0, 0, 0)
 letter_color = (255, 255, 255)
 
-font = 'data/DejaVuSans-Bold.ttf'
+fonts = []
+for font in os.listdir("data/fonts"):
+    fonts.append("data/fonts/" + font)
 
 for letter in string.ascii_letters:
+    print("\r" + letter, end="", flush=True)
     if letter in "ij":
         letter = letter.upper()
-    image = draw(letter, size, letter_color)
-    image.save("data/letters/{}.jpg".format(letter))
+    for i in range(len(fonts)):
+
+        image = draw(letter, size, letter_color, fonts[i])
+        image.save("data/letters/{}_{}.jpg".format(letter, i))

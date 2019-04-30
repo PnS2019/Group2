@@ -26,18 +26,23 @@ X = []
 y = []
 
 letters = string.ascii_uppercase
+folder = "data/letters/"
+images = os.listdir(folder)
 
-for image in os.listdir("data/letters/"):
-  im = cv2.imread("data/letters/" + image)
-  letter = image.split(".")[0].upper()
+for i in range(len(images)):
+  if images[i].endswith(".jpg"):
+    im = cv2.imread(folder + images[i])
+    letter = images[i][0].upper()
 
-  index = letters.index(letter)
+    index = letters.index(letter)
 
-  X.append(im)
-  y.append(index)
+    X.append(im)
+    y.append(index)
+    print("\rImage {}/{} loaded".format(i, len(images)), end=" " * 5)
 
 train_x = np.array(X)
 train_y = np.array(y)
+
 
 test_x = np.array(X)
 test_y = np.array(y)
@@ -108,12 +113,12 @@ model.compile(loss="categorical_crossentropy",
 print("[MESSAGE] Model is compiled.")
 
 # Create Image Data Generator
-datagen = ImageDataGenerator(featurewise_center=True,
-                             featurewise_std_normalization=True,
-                             width_shift_range=0.1,
+datagen = ImageDataGenerator(width_shift_range=0.1,
                              height_shift_range=0.1,
                              rotation_range=10,
-                             shear_range=0.1)
+                             shear_range=0.1,
+                             validation_split=0.2)
+
 
 # compute quantities required for featurewise normalization
 # (std, mean, and principal components if ZCA whitening is applied)
@@ -131,7 +136,7 @@ history = model.fit_generator(datagen.flow(train_x, train_Y, batch_size=64),
 print("[MESSAGE] Model is trained.")
 
 # save the trained model
-model.save("conv-net-fashion-mnist-trained.hdf5")
+model.save("models/letclass_valacc{:.3f}.hdf5".format(history.history["val_acc"]))
 
 print("[MESSAGE] Model is saved.")
 
