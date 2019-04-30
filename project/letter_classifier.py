@@ -113,7 +113,9 @@ model.compile(loss="categorical_crossentropy",
 print("[MESSAGE] Model is compiled.")
 
 # Create Image Data Generator
-datagen = ImageDataGenerator(width_shift_range=0.1,
+datagen = ImageDataGenerator(featurewise_center=True,
+                             featurewise_std_normalization=True,
+                             width_shift_range=0.1,
                              height_shift_range=0.1,
                              rotation_range=10,
                              shear_range=0.1,
@@ -136,7 +138,7 @@ history = model.fit_generator(datagen.flow(train_x, train_Y, batch_size=64),
 print("[MESSAGE] Model is trained.")
 
 # save the trained model
-model.save("models/letclass_valacc{:.3f}.hdf5".format(history.history["val_acc"]))
+model.save("conv-net-fashion-mnist-trained.hdf5")
 
 print("[MESSAGE] Model is saved.")
 
