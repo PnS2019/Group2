@@ -80,7 +80,7 @@ num_train_samples = train_x.shape[0]
 num_test_samples = test_x.shape[0]
 input_shape = train_x.shape[1:]
 
-kernel_sizes = [(7, 7), (5, 5)]
+kernel_sizes = [(11, 11), (5, 5)]
 num_kernels = [20, 25]
 
 pool_sizes = [(2, 2), (2, 2)]
@@ -110,6 +110,7 @@ model.summary()
 model.compile(loss="categorical_crossentropy",
               optimizer="sgd",
               metrics=["accuracy"])
+
 print("[MESSAGE] Model is compiled.")
 
 # Create Image Data Generator
@@ -138,7 +139,7 @@ history = model.fit_generator(datagen.flow(train_x, train_Y, batch_size=64),
 print("[MESSAGE] Model is trained.")
 
 # save the trained model
-model.save("conv-net-fashion-mnist-trained.hdf5")
+model.save("models/letclass_valacc{:.3f}.hdf5".format(history.history["val_acc"][-1]))
 
 print("[MESSAGE] Model is saved.")
 
