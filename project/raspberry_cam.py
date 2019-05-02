@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 # import the necessary packages
 from picamera.array import PiRGBArray
 from picamera import PiCamera
@@ -6,7 +8,7 @@ import cv2
 from responsive_voice import ResponsiveVoice
 from tensorflow.keras.models import Model, load_model
 import string
-
+import numpy as np
 
 def xCoo(arr):
     return arr[0][0]
@@ -17,28 +19,30 @@ def yCoo(arr):
 
 
 def letters(picture):
+    upper_bound_rectangle_area = 18000
+    lower_bound_rectangle_area = 500
+
     potential_letters = []
     # color detection
     lower_blue = np.array([100, 40, 0])
     upper_blue = np.array([135, 255, 255])
 
     # converting colorspace:
-    picture = cv.resize(picture, (1920, 1080))
-    hsv = cv.cvtColor(picture, cv.COLOR_BGR2HSV)
+    hsv = cv2.cvtColor(picture, cv2.COLOR_BGR2HSV)
     # filtered version of Picture:
-    #hsv = cv.GaussianBlur(hsv,(3,3),2)
+    #hsv = cv2.GaussianBlur(hsv,(3,3),2)
 
-    filtered = cv.inRange(hsv, lower_blue, upper_blue)
-    filtered = cv.bitwise_not(filtered)
+    filtered = cv2.inRange(hsv, lower_blue, upper_blue)
+    filtered = cv2.bitwise_not(filtered)
 
     # contour detection:
 
-    _, ctrs, hier = cv.findContours(filtered, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+    _, ctrs, hier = cv2.findContours(filtered, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    picture = cv.cvtColor(filtered, cv.COLOR_GRAY2RGB)
+    picture = cv2.cvtColor(filtered, cv2.COLOR_GRAY2RGB)
 
     # creting an array of rectangles with areas
-    rects_and_area = [[cv.boundingRect(ctr), cv.contourArea(ctr)] for ctr in ctrs]
+    rects_and_area = [[cv2.boundingRect(ctr), cv2.contourArea(ctr)] for ctr in ctrs]
 
     # sorting the areas and rectangles from left to right
     rects_and_area.sort(key=xCoo)
@@ -49,7 +53,7 @@ def letters(picture):
 
             out_cropped = picture[rectangle[0][1]:rectangle[0][1] + rectangle[0][3],
                                   rectangle[0][0]:rectangle[0][0] + rectangle[0][2]]
-            out_cropped = cv.resize(out_cropped, (32, 32))
+            out_cropped = cv2.resize(out_cropped, (32, 32))
 
             potential_letters.append(out_cropped)
     return potential_letters
@@ -62,17 +66,17 @@ def say_text(text):
 
 
 model = load_model('models/letclass_valacc0.921.hdf5')
-model.compile()
+#model.compile()
 
 
 def get_text(letters):
     global model
-    preds = np.argmax(model.predict(letters), axis=1).astype(np.int)
     out = ""
-    for letter_index in preds:
-        out += string.ascii_lowercase[letter_index]
+    
+    for letter in letters:
+      pred = np.argmax(model.predict(letter.reshape(1,32,32,3)), axis=1).astype(np.int)
+      out += string.ascii_lowercase[pred[0]]
     return out
-
 
 
 # initialize the camera and grab a reference to the raw camera capture
@@ -90,12 +94,13 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     # and occupied/unoccupied text
     image = frame.array
 
-    l = letters(image)
-    name = get_text(l)
-    print(name)
-
     # Display the resulting frame
     cv2.imshow('frame', image)
+    
+    l = letters(image)
+    name = get_text(l)
+    print("\r"+name, end = " "*10)
+
     # the loop breaks at pressing `q`
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
