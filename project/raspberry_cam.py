@@ -9,6 +9,9 @@ from responsive_voice import ResponsiveVoice
 from tensorflow.keras.models import Model, load_model
 import string
 import numpy as np
+import json
+from fuzzywuzzy import process
+
 
 def xCoo(arr):
     return arr[0][0]
@@ -66,20 +69,35 @@ def say_text(text):
 
 
 model = load_model('models/letclass_valacc0.921.hdf5')
-#model.compile()
+# model.compile()
 
 
 def get_text(letters):
     global model
     out = ""
-    
+
     for letter in letters:
-      pred = np.argmax(model.predict(letter.reshape(1,32,32,3)), axis=1).astype(np.int)
-      out += string.ascii_lowercase[pred[0]]
+        pred = np.argmax(model.predict(letter.reshape(1, 32, 32, 3)), axis=1).astype(np.int)
+        out += string.ascii_lowercase[pred[0]]
     return out
 
 
-# initialize the camera and grab a reference to the raw camera capture
+with open("data/stations.json") as f:
+    stations = json.loads(f.read())
+
+station_list = stations.keys()
+
+
+def get_station_name(station):
+    station = process.extract("miibuck", station_list, limit=1)[0]
+    accuracy = station[1]
+    if accuracy > 50:
+        return stations[station[0]]
+    else:
+        return None
+
+
+    # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
 camera.resolution = (640, 480)
 camera.framerate = 32
@@ -96,10 +114,10 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 
     # Display the resulting frame
     cv2.imshow('frame', image)
-    
+
     l = letters(image)
     name = get_text(l)
-    print("\r"+name, end = " "*10)
+    print("\r" + get_station_name(name), end=" " * 10)
 
     # the loop breaks at pressing `q`
     if cv2.waitKey(1) & 0xFF == ord('q'):
