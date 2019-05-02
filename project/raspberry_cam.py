@@ -4,11 +4,26 @@ from picamera import PiCamera
 import time
 import cv2
 from responsive_voice import ResponsiveVoice
+from tensorflow.keras.models import Model, load_model
+import string
+
 
 def say_text(text):
-    """Speaks a text over the speaker"""
-    speaker = ResponsiveVoice(rate=.5, vol=1)
-    speaker.say(text,gender="male",lang="en-GB")
+  """Speaks a text over the speaker"""
+  speaker = ResponsiveVoice(rate=.5, vol=1)
+  speaker.say(text, gender="male", lang="en-GB")
+
+
+def get_text(letters):
+  model = load_model('my_model.h5')
+  model.compile()
+  preds = np.argmax(model.predict(letters), axis=1).astype(np.int)
+  out = ""
+  for letter_index in preds:
+    out += string.ascii_lowercase[letter_index]
+  return out
+
+
 
 # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
@@ -29,9 +44,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
   cv2.imshow('frame', image)
   # the loop breaks at pressing `q`
   if cv2.waitKey(1) & 0xFF == ord('q'):
-      break
-
-
+    break
 
   # clear the stream in preparation for the next frame
   rawCapture.truncate(0)
