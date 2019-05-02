@@ -11,6 +11,8 @@ import string
 import numpy as np
 import json
 from fuzzywuzzy import process
+from fuzzywuzzy import fuzz
+
 
 
 def xCoo(arr):
@@ -23,7 +25,7 @@ def yCoo(arr):
 
 def letters(picture):
     upper_bound_rectangle_area = 3000
-    lower_bound_rectangle_area = 150
+    lower_bound_rectangle_area = 100
 
     potential_letters = []
     # color detection
@@ -88,13 +90,14 @@ with open("data/stations.json") as f:
 station_list = stations.keys()
 
 
-def get_station_name(station):
-    station = process.extract("miibuck", station_list, limit=1)[0]
-    accuracy = station[1]
-    if accuracy > 50:
-        return stations[station[0]]
-    else:
-        return None
+def get_station_name(station_raw):
+    if station_raw != "":
+      station = process.extractOne(station_raw, station_list, scorer = fuzz.ratio)
+      accuracy = station[1]
+      if accuracy > 70:
+          #print("fuzzy: ",station_raw, station)
+          return stations[station[0]]
+    return "No station found"
 
 
     # initialize the camera and grab a reference to the raw camera capture
