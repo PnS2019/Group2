@@ -29,9 +29,12 @@ letters = string.ascii_uppercase
 folder = "data/letters/"
 images = os.listdir(folder)
 
+imagesize = (32, 32)
+
 for i in range(len(images)):
   if images[i].endswith(".jpg"):
     im = cv2.imread(folder + images[i])
+    im = cv2.resize(cv2.imread(folder + images[i]), imagesize)
     letter = images[i][0].upper()
 
     index = letters.index(letter)
@@ -42,6 +45,24 @@ for i in range(len(images)):
 
 train_x = np.array(X)
 train_y = np.array(y)
+
+
+X = []
+y = []
+
+folder = "data/lettersRbpi/"
+images = os.listdir(folder)
+
+for i in range(len(images)):
+  if images[i].endswith(".jpg"):
+    im = cv2.resize(cv2.imread(folder + images[i]), imagesize)
+    letter = images[i][0].upper()
+
+    index = letters.index(letter)
+
+    X.append(im)
+    y.append(index)
+    print("\rImage {}/{} loaded".format(i, len(images)), end=" " * 5)
 
 
 test_x = np.array(X)
@@ -80,7 +101,7 @@ num_train_samples = train_x.shape[0]
 num_test_samples = test_x.shape[0]
 input_shape = train_x.shape[1:]
 
-kernel_sizes = [(11, 11), (5, 5)]
+kernel_sizes = [(11, 11), (7, 7)]
 num_kernels = [20, 25]
 
 pool_sizes = [(2, 2), (2, 2)]
@@ -133,7 +154,7 @@ print("[MESSAGE] Data Generator is created.")
 # train the model
 history = model.fit_generator(datagen.flow(train_x, train_Y, batch_size=64),
                               steps_per_epoch=len(train_x) / 64,
-                              epochs=100,
+                              epochs=50,
                               validation_data=(test_x, test_Y))
 
 print("[MESSAGE] Model is trained.")
@@ -141,20 +162,29 @@ print("[MESSAGE] Model is trained.")
 # save the trained model
 model.save("models/letclass_valacc{:.3f}.hdf5".format(history.history["val_acc"][-1]))
 
+
 print("[MESSAGE] Model is saved.")
 
-# visualize the ground truth and prediction
-# take first 10 examples in the testing dataset
-test_x_vis = test_x[:10]  # fetch first 10 samples
-ground_truths = test_y[:10]  # fetch first 10 ground truth prediction
 # predict with the model
-preds = np.argmax(model.predict(test_x_vis), axis=1).astype(np.int)
+preds = np.argmax(model.predict(test_x), axis=1).astype(np.int)
 
+wrong_images = []
+wrong_preds = []
+n_show = 15
+for i in range(len(preds)):
+  if preds[i] != test_y[i]:
+    wrong_images.append(test_x[i])
+    wrong_preds.append(preds[i])
+    n_show -= 1
+    if n_show == 0:
+      break
+
+print(len(wrong_images))
 
 plt.figure()
 for i in range(2):
   for j in range(5):
     plt.subplot(2, 5, i * 5 + j + 1)
-    plt.imshow(np.squeeze(test_x[i * 5 + j]), cmap="gray")
-    plt.title(string.ascii_uppercase[preds[i * 5 + j]])
+    plt.imshow(np.squeeze(wrong_images[i * 5 + j]), cmap="gray")
+    plt.title(string.ascii_uppercase[wrong_preds[i * 5 + j]])
 plt.show()

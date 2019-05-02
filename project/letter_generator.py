@@ -54,6 +54,6 @@ for letter in string.ascii_letters:
     if letter in "ij":
         letter = letter.upper()
     for i in range(len(fonts)):
-
+        fontname = fonts[i].split("/")[-1].split(".")[0]
         image = draw(letter, size, letter_color, fonts[i])
-        image.save("data/letters/{}_{}.jpg".format(letter, i))
+        image.save("data/letters/{}_{}_{}.jpg".format(letter, i, fontname))
