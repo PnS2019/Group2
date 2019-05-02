@@ -12,7 +12,7 @@ import numpy as np
 import json
 from fuzzywuzzy import process
 from fuzzywuzzy import fuzz
-
+from pySBB import get_stationboard
 
 
 def xCoo(arr):
@@ -92,13 +92,26 @@ station_list = stations.keys()
 
 def get_station_name(station_raw):
     if station_raw != "":
-      station = process.extractOne(station_raw, station_list, scorer = fuzz.ratio)
-      accuracy = station[1]
-      if accuracy > 70:
-          #print("fuzzy: ",station_raw, station)
-          return stations[station[0]]
+        station = process.extractOne(station_raw, station_list, scorer=fuzz.ratio)
+        accuracy = station[1]
+        if accuracy > 70:
+            #print("fuzzy: ",station_raw, station)
+            return stations[station[0]]
     return "No station found"
 
+
+def say_connections(station_name_full):
+    entries = get_stationboard(station_name_full)[:5]
+    text = "Connections for {}:\n".format(station_name_full)
+    for entry in entries:
+        if entry.category == "T":
+            category = "Tram"
+        else:
+            category = entry.category
+        text += "{} Number {} to {}, departs at {}.\n".format(category, entry.number, entry.to, entry.stop.departure)
+
+    print(text)
+    say_text(text)
 
     # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
@@ -108,6 +121,9 @@ rawCapture = PiRGBArray(camera, size=(640, 480))
 
 # allow the camera to warmup
 time.sleep(0.1)
+
+successive_matches = 0
+previous_station = None
 
 # capture frames from the camera
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
@@ -119,8 +135,18 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     cv2.imshow('frame', image)
 
     l = letters(image)
-    name = get_text(l)
-    print("\r" + get_station_name(name), end=" " * 10)
+    name = get_station_name(get_text(l))
+
+    if name == previous_station:
+        successive_matches += 1
+    else:
+        successive_matches = 0
+        previous_station = name
+
+    if successive_matches > 5:
+        say_connections(name)
+
+    print("\r" + name, end=" " * 10)
 
     # the loop breaks at pressing `q`
     if cv2.waitKey(1) & 0xFF == ord('q'):
