@@ -19,8 +19,8 @@ def yCoo(arr):
 
 
 def letters(picture):
-    upper_bound_rectangle_area = 18000
-    lower_bound_rectangle_area = 500
+    upper_bound_rectangle_area = 3000
+    lower_bound_rectangle_area = 150
 
     potential_letters = []
     # color detection
