@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 # import the necessary packages
-print("Importint Packages", flush=True, )
+print("Importint Packages", flush=True, end="")
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 import time
@@ -71,7 +71,7 @@ def letters(picture):
     return potential_letters
 
 
-print("Loading machine learning model", flush=True, )
+print("Loading machine learning model", flush=True, end="")
 model = load_model('models/letclass_valacc0.921.hdf5')
 print("- Done")
 
@@ -88,7 +88,7 @@ def get_text(letters):
     return out
 
 
-print("Loading tram stations", flush=True, )
+print("Loading tram stations", flush=True, end="")
 with open("data/stations.json") as f:
     stations = json.loads(f.read())
 
@@ -133,7 +133,7 @@ def say_connections(station_name_full, lang=ResponsiveVoice.ENGLISH_GB):
     speaker.say(text)
 
 
-print("Initializing Pi Camera", flush=True, )
+print("Initializing Pi Camera", flush=True, end="")
 # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
 camera.resolution = (640, 480)
