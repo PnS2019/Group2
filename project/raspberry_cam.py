@@ -68,12 +68,6 @@ def letters(picture):
     return potential_letters
 
 
-def say_text(text, lang="en-GB"):
-    """Speaks a text over the speaker"""
-    speaker = ResponsiveVoice(rate=.5, vol=1, lang=lang)
-    speaker.say(text, gender="female")
-
-
 model = load_model('models/letclass_valacc0.921.hdf5')
 # model.compile()
 
@@ -104,45 +98,7 @@ def get_station_name(station_raw):
     return None
 
 
-def say_connections(station_name_full):
-    english_speaker = ResponsiveVoice(rate=.5, vol=1, gender=ResponsiveVoice.FEMALE, lang=ResponsiveVoice.ENGLISH_GB)
-    german_speaker = ResponsiveVoice(rate=.5, vol=1, gender=ResponsiveVoice.FEMALE, lang=ResponsiveVoice.GERMAN)
-
-    entries = get_stationboard(station_name_full)[:5]
-    english_speaker.say("Connections for {}:\n".format(station_name_full))
-    for entry in entries:
-        if entry.category == "T":
-            category = "Tram"
-        else:
-            category = entry.category
-
-        seconds = (entry.stop.departure.timestap - time.time * 1000) // 1000
-        minutes = seconds // 60
-        hours = minutes // 60
-        minutes -= hours * 60
-        seconds -= hours * 3600 + minutes * 60
-
-        if hours != 0:
-            departure = "{} hours and {} minutes".format(hours, minutes)
-        elif minutes != 0:
-            departure = "{} minutes".format(minutes)
-        else:
-            departure = "{} seconds".format(seconds)
-
-        file1 = english_speaker.get_mp3("{} Number {} to ".format(category, entry.number))
-        file2 = german_speaker.get_mp3(entry.to)
-        file3 = english_speaker.get_mp3("departs in {}.".format(departure))
-
-        cutaway_ms = 150
-        segment1 = AudioSegment.from_mp3(file1)[:-cutaway_ms]
-        segment2 = AudioSegment.from_mp3(file2)[cutaway_ms:-cutaway_ms]
-        segment3 = AudioSegment.from_mp3(file3)[cutaway_ms:]
-
-        total = segment1 + segment2 + segment3
-        play(total)
-
-
-def say_connections_onelang(station_name_full, lang=ResponsiveVoice.ENGLISH_GB):
+def say_connections(station_name_full, lang=ResponsiveVoice.ENGLISH_GB):
     speaker = ResponsiveVoice(rate=.5, vol=1, gender=ResponsiveVoice.FEMALE, lang=lang)
 
     entries = get_stationboard(station_name_full)[:5]
@@ -153,11 +109,25 @@ def say_connections_onelang(station_name_full, lang=ResponsiveVoice.ENGLISH_GB):
         else:
             category = entry.category
 
-        text += "{} Number {} to {} departs at {}.\n".format(category, entry.number, entry.to, entry.stop.departure)
+        print(entry.stop.departureTimestamp, time.time())
+        seconds = int((entry.stop.departureTimestamp - time.time()))
+        minutes = 1 + int(seconds / 60)
+        hours = minutes // 60
+        minutes -= hours * 60
+        seconds -= hours * 3600 + minutes * 60
 
+        if hours != 0:
+            departure = "{} hours and {} minutes".format(hours, minutes)
+        else:
+            departure = "{} minutes".format(minutes)
+
+        text += "{} Number {} to {} departs in {}.\n".format(category, entry.number, entry.to, departure)
+
+    print(text)
     speaker.say(text)
 
-    # initialize the camera and grab a reference to the raw camera capture
+
+# initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
 camera.resolution = (640, 480)
 camera.framerate = 2
@@ -189,7 +159,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         previous_station = name
 
     if successive_matches >= 3:
-        say_connections_onelang(name)
+        say_connections(name)
 
     # the loop breaks at pressing `q`
     if cv2.waitKey(1) & 0xFF == ord('q'):
