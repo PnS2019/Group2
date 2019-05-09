@@ -38,7 +38,7 @@ def letters(picture):
     # converting colorspace:
     hsv = cv2.cvtColor(picture, cv2.COLOR_BGR2HSV)
     # filtered version of Picture:
-    #hsv = cv2.GaussianBlur(hsv,(3,3),2)
+    # hsv = cv2.GaussianBlur(hsv,(3,3),2)
 
     filtered = cv2.inRange(hsv, lower_blue, upper_blue)
     filtered = cv2.bitwise_not(filtered)
@@ -98,12 +98,9 @@ def get_station_name(station_raw):
         station = process.extractOne(station_raw, station_list, scorer=fuzz.ratio)
         accuracy = station[1]
         if accuracy > 70:
-            #print("fuzzy: ",station_raw, station)
+            # print("fuzzy: ",station_raw, station)
             return stations[station[0]]
     return None
-
-
-modelmodelmodelmodelmmodelodel
 
 
 def say_connections(station_name_full):
@@ -130,6 +127,21 @@ def say_connections(station_name_full):
         total = segment1 + segment2 + segment3
         play(total)
 
+
+def say_connections_onelang(station_name_full, lang=ResponsiveVoice.ENGLISH_GB):
+    speaker = ResponsiveVoice(rate=.5, vol=1, gender=ResponsiveVoice.FEMALE, lang=lang)
+
+    entries = get_stationboard(station_name_full)[:5]
+    text = "Connections for {}:\n".format(station_name_full)
+    for entry in entries:
+        if entry.category == "T":
+            category = "Tram"
+        else:
+            category = entry.category
+
+        text += "{} Number {} to {} departs at {}.\n".format(category, entry.number, entry.to, entry.stop.departure)
+
+    speaker.say(text)
 
     # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
@@ -162,8 +174,8 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         successive_matches = 0
         previous_station = name
 
-    if successive_matches > 3:
-        say_connections(name)
+    if successive_matches >= 3:
+        say_connections_onelang(name)
 
     # the loop breaks at pressing `q`
     if cv2.waitKey(1) & 0xFF == ord('q'):
