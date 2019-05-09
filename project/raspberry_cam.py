@@ -64,7 +64,7 @@ def letters(picture):
     return potential_letters
 
 
-def say_text(text):
+def say_text(text, lang="en-GB"):
     """Speaks a text over the speaker"""
     speaker = ResponsiveVoice(rate=.5, vol=1)
     speaker.say(text, gender="male", lang="en-GB")
@@ -108,10 +108,10 @@ def say_connections(station_name_full):
             category = "Tram"
         else:
             category = entry.category
-        text += "{} Number {} to {}, departs at {}.\n".format(category, entry.number, entry.to, entry.stop.departure)
 
-    print(text)
-    say_text(text)
+        say_text("{} Number {} to ".format(category, entry.number), lang="en-GB")
+        say_text(entry.to, lang="de-DE")
+        say_text("departs at {}.".format(entry.stop.departure), lang="en-GB")
 
     # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
