@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 # import the necessary packages
-print("Importint Packages", flush=True, end="")
+print("Importing Packages", flush=True, end="")
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 import time
@@ -19,7 +19,7 @@ from pydub.generators import Sine
 from pydub.playback import play
 import time
 
-print("- Done")
+print(" - Done")
 
 
 def xCoo(arr):
@@ -73,7 +73,7 @@ def letters(picture):
 
 print("Loading machine learning model", flush=True, end="")
 model = load_model('models/letclass_valacc0.921.hdf5')
-print("- Done")
+print(" - Done")
 
 # model.compile()
 
@@ -93,7 +93,7 @@ with open("data/stations.json") as f:
     stations = json.loads(f.read())
 
 station_list = stations.keys()
-print("- Done")
+print(" - Done")
 
 
 def get_station_name(station_raw):
@@ -107,10 +107,10 @@ def get_station_name(station_raw):
 
 
 def say_connections(station_name_full, lang=ResponsiveVoice.ENGLISH_GB):
-    speaker = ResponsiveVoice(rate=.5, vol=1, gender=ResponsiveVoice.FEMALE, lang=lang)
+    speaker = ResponsiveVoice(rate=.5, vol=1, gender=ResponsiveVoice.MALE, lang=lang)
 
     entries = get_stationboard(station_name_full)[:5]
-    text = "Connections for {}:\n".format(station_name_full)
+    text = "Connections for {}. :\n".format(station_name_full)
     for entry in entries:
         if entry.category == "T":
             category = "Tram"
