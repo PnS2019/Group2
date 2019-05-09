@@ -97,7 +97,7 @@ def get_station_name(station_raw):
         if accuracy > 70:
             #print("fuzzy: ",station_raw, station)
             return stations[station[0]]
-    return "No station found"
+    return None
 
 
 def say_connections(station_name_full):
@@ -143,10 +143,8 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         successive_matches = 0
         previous_station = name
 
-    if successive_matches > 5:
+    if successive_matches > 5 and name is not None:
         say_connections(name)
-
-    print("\r" + name, end=" " * 10)
 
     # the loop breaks at pressing `q`
     if cv2.waitKey(1) & 0xFF == ord('q'):
