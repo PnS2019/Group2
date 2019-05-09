@@ -6,21 +6,13 @@ from pySBB import get_stationboard
 from responsive_voice import ResponsiveVoice
 
 
-def say_text(text):
+def say_text(text, lang):
     """Speaks a text over the speaker"""
     speaker = ResponsiveVoice(rate=.5, vol=1)
-    speaker.say(text, gender="male", lang="en-GB")
+    speaker.say(text, gender="female", lang=lang)
 
 
-with open("data/stations.json") as f:
-    stations = json.loads(f.read())
-
-station_list = stations.keys()
-
-station_raw = "miibuck"
-
-
-def say_connections():
+def say_connections(station_raw):
     results = process.extractOne(station_raw, station_list, scorer=fuzz.ratio)
 
     station_name = results[0]
@@ -36,4 +28,15 @@ def say_connections():
         text += "{} Number {} to {}, departs at {}.\n".format(category, entry.number, entry.to, entry.stop.departure)
 
     print(text)
-    say_text(text)
+    say_text(text, "de-DE")
+
+
+with open("data/stations.json") as f:
+    stations = json.loads(f.read())
+
+station_list = stations.keys()
+
+station_raw = "miibuck"
+
+
+say_connections(station_raw)

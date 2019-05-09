@@ -13,6 +13,8 @@ import json
 from fuzzywuzzy import process
 from fuzzywuzzy import fuzz
 from pySBB import get_stationboard
+from pydub import AudioSegment
+from pydub.playback import play
 
 
 def xCoo(arr):
@@ -66,8 +68,8 @@ def letters(picture):
 
 def say_text(text, lang="en-GB"):
     """Speaks a text over the speaker"""
-    speaker = ResponsiveVoice(rate=.5, vol=1)
-    speaker.say(text, gender="female", lang=lang)
+    speaker = ResponsiveVoice(rate=.5, vol=1, lang=lang)
+    speaker.say(text, gender="female")
 
 
 model = load_model('models/letclass_valacc0.921.hdf5')
@@ -101,6 +103,9 @@ def get_station_name(station_raw):
 
 
 def say_connections(station_name_full):
+    english_speaker = ResponsiveVoice(rate=.5, vol=1, gender=ResponsiveVoice.FEMALE, lang=ResponsiveVoice.ENGLISH_GB)
+    german_speaker = ResponsiveVoice(rate=.5, vol=1, gender=ResponsiveVoice.FEMALE, lang=ResponsiveVoice.GERMAN)
+
     entries = get_stationboard(station_name_full)[:5]
     text = "Connections for {}:\n".format(station_name_full)
     for entry in entries:
@@ -109,9 +114,17 @@ def say_connections(station_name_full):
         else:
             category = entry.category
 
-        say_text("{} Number {} to ".format(category, entry.number), lang="en-GB")
-        say_text(entry.to, lang="de-DE")
-        say_text("departs at {}.".format(entry.stop.departure), lang="en-GB")
+            file1 = english_speaker.get_mp3("{} Number {} to ".format(category, entry.number))
+            file2 = german_speaker.get_mp3(entry.to)
+            file3 = english_speaker.get_mp3("departs at {}.".format(entry.stop.departure))
+
+            cutaway_ms = 150
+            segment1 = AudioSegment.from_mp3(file1)[:-cutaway_ms]
+            segment2 = AudioSegment.from_mp3(file2)[cutaway_ms:-cutaway_ms]
+            segment3 = AudioSegment.from_mp3(file3)[cutaway_ms:]
+
+            total = segment1 + segment2 + segment3
+            play(total)
 
     # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
