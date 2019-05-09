@@ -103,6 +103,9 @@ def get_station_name(station_raw):
     return None
 
 
+modelmodelmodelmodelmmodelodel
+
+
 def say_connections(station_name_full):
     english_speaker = ResponsiveVoice(rate=.5, vol=1, gender=ResponsiveVoice.FEMALE, lang=ResponsiveVoice.ENGLISH_GB)
     german_speaker = ResponsiveVoice(rate=.5, vol=1, gender=ResponsiveVoice.FEMALE, lang=ResponsiveVoice.GERMAN)
@@ -127,10 +130,11 @@ def say_connections(station_name_full):
         total = segment1 + segment2 + segment3
         play(total)
 
+
     # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
 camera.resolution = (640, 480)
-camera.framerate = 32
+camera.framerate = 2
 rawCapture = PiRGBArray(camera, size=(640, 480))
 
 # allow the camera to warmup
@@ -151,14 +155,14 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     l = letters(image)
     name = get_station_name(get_text(l))
 
-    if name == previous_station:
+    if name == previous_station and name is not None:
         successive_matches += 1
         play(Sine(440 * successive_matches).to_audio_segment(duration=50))
     else:
         successive_matches = 0
         previous_station = name
 
-    if successive_matches > 3 and name is not None:
+    if successive_matches > 3:
         say_connections(name)
 
     # the loop breaks at pressing `q`
