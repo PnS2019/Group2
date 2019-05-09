@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 # import the necessary packages
+print("Importint Packages", end="")
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 import time
@@ -17,6 +18,8 @@ from pydub import AudioSegment
 from pydub.generators import Sine
 from pydub.playback import play
 import time
+
+print("- Done")
 
 
 def xCoo(arr):
@@ -68,7 +71,10 @@ def letters(picture):
     return potential_letters
 
 
+print("Loading machine learning model", end="")
 model = load_model('models/letclass_valacc0.921.hdf5')
+print("- Done")
+
 # model.compile()
 
 
@@ -82,10 +88,12 @@ def get_text(letters):
     return out
 
 
+print("Loading tram stations", end="")
 with open("data/stations.json") as f:
     stations = json.loads(f.read())
 
 station_list = stations.keys()
+print("- Done")
 
 
 def get_station_name(station_raw):
@@ -109,12 +117,10 @@ def say_connections(station_name_full, lang=ResponsiveVoice.ENGLISH_GB):
         else:
             category = entry.category
 
-        print(entry.stop.departureTimestamp, time.time())
         seconds = int((entry.stop.departureTimestamp - time.time()))
-        minutes = 1 + int(seconds / 60)
+        minutes = 1 + seconds // 60
         hours = minutes // 60
         minutes -= hours * 60
-        seconds -= hours * 3600 + minutes * 60
 
         if hours != 0:
             departure = "{} hours and {} minutes".format(hours, minutes)
@@ -127,6 +133,7 @@ def say_connections(station_name_full, lang=ResponsiveVoice.ENGLISH_GB):
     speaker.say(text)
 
 
+print("Initializing Pi Camera", end="")
 # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
 camera.resolution = (640, 480)
@@ -135,6 +142,7 @@ rawCapture = PiRGBArray(camera, size=(640, 480))
 
 # allow the camera to warmup
 time.sleep(0.1)
+print("- Done")
 
 successive_matches = 0
 previous_station = None
