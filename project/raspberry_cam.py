@@ -107,24 +107,24 @@ def say_connections(station_name_full):
     german_speaker = ResponsiveVoice(rate=.5, vol=1, gender=ResponsiveVoice.FEMALE, lang=ResponsiveVoice.GERMAN)
 
     entries = get_stationboard(station_name_full)[:5]
-    text = "Connections for {}:\n".format(station_name_full)
+    english_speaker.say("Connections for {}:\n".format(station_name_full))
     for entry in entries:
         if entry.category == "T":
             category = "Tram"
         else:
             category = entry.category
 
-            file1 = english_speaker.get_mp3("{} Number {} to ".format(category, entry.number))
-            file2 = german_speaker.get_mp3(entry.to)
-            file3 = english_speaker.get_mp3("departs at {}.".format(entry.stop.departure))
+        file1 = english_speaker.get_mp3("{} Number {} to ".format(category, entry.number))
+        file2 = german_speaker.get_mp3(entry.to)
+        file3 = english_speaker.get_mp3("departs at {}.".format(entry.stop.departure))
 
-            cutaway_ms = 150
-            segment1 = AudioSegment.from_mp3(file1)[:-cutaway_ms]
-            segment2 = AudioSegment.from_mp3(file2)[cutaway_ms:-cutaway_ms]
-            segment3 = AudioSegment.from_mp3(file3)[cutaway_ms:]
+        cutaway_ms = 150
+        segment1 = AudioSegment.from_mp3(file1)[:-cutaway_ms]
+        segment2 = AudioSegment.from_mp3(file2)[cutaway_ms:-cutaway_ms]
+        segment3 = AudioSegment.from_mp3(file3)[cutaway_ms:]
 
-            total = segment1 + segment2 + segment3
-            play(total)
+        total = segment1 + segment2 + segment3
+        play(total)
 
     # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
@@ -152,11 +152,12 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 
     if name == previous_station:
         successive_matches += 1
+        play(Sine(440 * successive_matches).to_audio_segment(duration=50))
     else:
         successive_matches = 0
         previous_station = name
 
-    if successive_matches > 5 and name is not None:
+    if successive_matches > 3 and name is not None:
         say_connections(name)
 
     # the loop breaks at pressing `q`
