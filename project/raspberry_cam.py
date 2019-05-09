@@ -158,7 +158,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         successive_matches = 0
         previous_station = name
 
-    if successive_matches >= 3:
+    if successive_matches >= 2:
         say_connections(name)
 
     # the loop breaks at pressing `q`
