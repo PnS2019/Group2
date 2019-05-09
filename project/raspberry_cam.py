@@ -14,6 +14,7 @@ from fuzzywuzzy import process
 from fuzzywuzzy import fuzz
 from pySBB import get_stationboard
 from pydub import AudioSegment
+from pydub.generators import Sine
 from pydub.playback import play
 
 
