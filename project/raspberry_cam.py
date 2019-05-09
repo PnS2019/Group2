@@ -16,6 +16,7 @@ from pySBB import get_stationboard
 from pydub import AudioSegment
 from pydub.generators import Sine
 from pydub.playback import play
+import time
 
 
 def xCoo(arr):
@@ -115,9 +116,22 @@ def say_connections(station_name_full):
         else:
             category = entry.category
 
+        seconds = (entry.stop.departure.timestap - time.time * 1000) // 1000
+        minutes = seconds // 60
+        hours = minutes // 60
+        minutes -= hours * 60
+        seconds -= hours * 3600 + minutes * 60
+
+        if hours != 0:
+            departure = "{} hours and {} minutes".format(hours, minutes)
+        elif minutes != 0:
+            departure = "{} minutes".format(minutes)
+        else:
+            departure = "{} seconds".format(seconds)
+
         file1 = english_speaker.get_mp3("{} Number {} to ".format(category, entry.number))
         file2 = german_speaker.get_mp3(entry.to)
-        file3 = english_speaker.get_mp3("departs at {}.".format(entry.stop.departure))
+        file3 = english_speaker.get_mp3("departs in {}.".format(departure))
 
         cutaway_ms = 150
         segment1 = AudioSegment.from_mp3(file1)[:-cutaway_ms]
