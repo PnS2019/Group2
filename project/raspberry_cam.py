@@ -67,7 +67,7 @@ def letters(picture):
 def say_text(text, lang="en-GB"):
     """Speaks a text over the speaker"""
     speaker = ResponsiveVoice(rate=.5, vol=1)
-    speaker.say(text, gender="male", lang=lang)
+    speaker.say(text, gender="female", lang=lang)
 
 
 model = load_model('models/letclass_valacc0.921.hdf5')
